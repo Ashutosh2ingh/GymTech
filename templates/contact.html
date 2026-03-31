@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="contact-section py-5" style="min-height: 90vh;">
+
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Contact Us</h2>
+        </div>
+
+        <div class="row">
+
+            <!-- LEFT: FORM -->
+            <div class="col-md-6">
+                <form>
+                    <input type="text" class="form-control contact-input mb-3" placeholder="Your Name">
+                    <input type="email" class="form-control contact-input mb-3" placeholder="Your Email">
+                    <textarea class="form-control contact-input mb-3" rows="5" placeholder="Your Message"></textarea>
+
+                    <button class="btn btn-hero">Send Message</button>
+                </form>
+            </div>
+
+            <!-- RIGHT: INFO -->
+            <div class="col-md-6 text-white d-flex flex-column justify-content-center align-items-center">
+                <h4 class="mb-3 fs-1">Get in Touch</h4>
+                <p class="fs-3"><strong>📍 Address:</strong> Ahmedabad, Gujarat, India</p>
+                <p class="fs-4"><strong>📞 Phone:</strong> +91 9876543210</p>
+                <p class="fs-4"><strong>✉ Email:</strong> support@gym.com</p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

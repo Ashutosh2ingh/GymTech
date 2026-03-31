@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="profile-section d-flex justify-content-center align-items-center">
+
+    <div class="profile-card">
+
+        <!-- PROFILE IMAGE -->
+        <div class="text-center">
+            <img 
+                src="{{ url_for('static', filename='images/' + (user.profile.image if user.profile and user.profile.image else 'about.png')) }}"
+                class="profile-img"
+            >
+        </div>
+
+        <!-- USER INFO -->
+        <h3 class="text-center mt-3">{{ user.name }}</h3>
+        <p class="text-center text-info">{{ user.email }}</p>
+
+        <div class="profile-info mt-4">
+
+        <div class="info-grid">
+            <div class="info-box">
+                <span>Phone</span>
+                <p>{{ user.profile.phone if user.profile and user.profile.phone else 'Not Available' }}</p>
+            </div>
+
+            <div class="info-box">
+                <span>Type</span>
+                <p>{{ user.profile.user_type if user.profile else 'Member' }}</p>
+            </div>
+
+            <div class="info-box">
+                <span>Plan</span>
+                <p>
+                    {% if user.profile and user.profile.plan %}
+                        {{ user.profile.plan.name }}
+                    {% else %}
+                        No Plan Selected
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="info-box">
+                <span>Price</span>
+                <p>
+                    {% if user.profile and user.profile.plan %}
+                        ₹{{ user.profile.plan.price }}/month
+                    {% else %}
+                        --
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="info-box">
+                <span>Start Date</span>
+                <p>
+                    {% if user.profile and user.profile.start_date %}
+                        {{ user.profile.start_date.strftime('%d-%B-%y') }}
+                    {% else %}
+                        Not Started
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="info-box">
+                <span>End Date</span>
+                <p>
+                    {% if user.profile and user.profile.end_date %}
+                        {{ user.profile.end_date.strftime('%d-%B-%y') }}
+                    {% else %}
+                        Not Available
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="info-box full-width">
+                <span>Address</span>
+                <p>
+                    {{ user.profile.address if user.profile and user.profile.address else 'Not Available' }}
+                </p>
+            </div>
+        </div>
+
+</div>
+
+        <!-- EDIT BUTTON -->
+        <div class="text-center mt-4">
+            <button class="btn btn-hero px-4"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editModal">
+                Edit Profile
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- 🔥 EDIT MODAL -->
+<div class="modal fade" id="editModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Profile</h5>
+                <button type="button" class="btn-close custom-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form method="POST" action="/update-profile" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <label class="form-label">Phone</label>
+                    <input type="text" name="phone" class="form-control" value="{{ user.profile.phone if user.profile else '' }}">
+
+                    <label class="form-label mt-3">Address</label>
+                    <input type="text" name="address" class="form-control" value="{{ user.profile.address if user.profile else '' }}">
+                    
+                    <label class="form-label mt-3">User Type</label>
+                    <select name="user_type" class="form-control" {% if session.get('user_type') != 'Admin' %}disabled{% endif %}>
+                        <option value="Member"
+                            {% if user.profile and user.profile.user_type == 'Member' %}
+                                selected
+                            {% endif %}
+                        >
+                            Member
+                        </option>
+                        <option value="Admin"
+                            {% if user.profile and user.profile.user_type == 'Admin' %}
+                                selected
+                            {% endif %}
+                        >
+                            Admin
+                        </option>
+                    </select>
+
+                    {% if session.get('user_type') != 'Admin' %}
+                        <input type="hidden" name="user_type" value="Member">
+                    {% endif %}
+
+                    <div class="custom-file-upload">
+                        <label for="profileImage" class="upload-btn">
+                            <i class="bi bi-image me-2"></i> Upload Image
+                        </label>
+                        <span id="file-name">No file selected</span>
+                        <input 
+                            type="file" 
+                            id="profileImage" 
+                            name="image"
+                            accept="image/*"
+                            hidden
+                            onchange="updateFileName(this)"
+                        >
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-hero">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}  
