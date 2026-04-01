@@ -103,37 +103,54 @@
 
 </div>
 
-<div class="contact-section py-5">
-
+<footer class="gym-footer">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-title">Contact Us</h2>
+        <div class="row align-items-center">
+
+            <!-- LEFT: LOGO + BRAND -->
+            <div class="col-md-4 text-center text-md-start mb-4 mb-md-0">
+                <div class="footer-brand d-flex align-items-center justify-content-center justify-content-md-start">
+                    <img 
+                        src="{{ url_for('static', filename='images/logo.png') }}" 
+                        alt="GymTech Logo"
+                        class="footer-logo"
+                    >
+                    <span class="footer-brand-text ms-2">GymTech</span>
+                </div>
+                <p class="footer-desc mt-3">
+                    Your ultimate fitness partner for strength, health, and transformation.
+                </p>
+            </div>
+
+            <!-- CENTER: QUICK LINKS -->
+            <div class="col-md-4 text-center mb-4 mb-md-0">
+                <h5 class="footer-heading">Quick Links</h5>
+                <ul class="footer-links">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/plan">Plans</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                    {% if session.get('user_type') == 'Admin' %}
+                        <li><a href="/members">Members</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <!-- RIGHT: CONTACT INFO -->
+            <div class="col-md-4 text-center text-md-end">
+                <h5 class="footer-heading">Reach Us</h5>
+                <p class="footer-info mb-1">📍 Ahmedabad, Gujarat</p>
+                <p class="footer-info mb-1">📞 +91 8707332099</p>
+                <p class="footer-info">✉ support@gymtech.com</p>
+            </div>
+
         </div>
 
-        <div class="row">
+        <hr class="footer-line">
 
-            <!-- LEFT: FORM -->
-            <div class="col-md-6">
-                <form>
-                    <input type="text" class="form-control contact-input mb-3" placeholder="Your Name">
-                    <input type="email" class="form-control contact-input mb-3" placeholder="Your Email">
-                    <textarea class="form-control contact-input mb-3" rows="5" placeholder="Your Message"></textarea>
-
-                    <button class="btn btn-hero">Send Message</button>
-                </form>
-            </div>
-
-            <!-- RIGHT: INFO -->
-            <div class="col-md-6 text-white d-flex flex-column justify-content-center align-items-center">
-                <h4 class="mb-3 fs-1">Get in Touch</h4>
-                <p class="fs-3"><strong>📍 Address:</strong> Ahmedabad, Gujarat, India</p>
-                <p class="fs-4"><strong>📞 Phone:</strong> +91 9876543210</p>
-                <p class="fs-4"><strong>✉ Email:</strong> support@gym.com</p>
-            </div>
-
+        <div class="text-center footer-bottom">
+            © 2026 GymTech. All Rights Reserved.
         </div>
     </div>
-
-</div>
+</footer>
 
 {% endblock %}
