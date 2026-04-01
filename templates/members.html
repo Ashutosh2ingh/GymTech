@@ -22,13 +22,14 @@
 
                 <thead>
                     <tr>
-                        <th>User</th>
+                        <th class="d-flex flex-start" style="padding-left:100px;">Name</th>
                         <th>Email</th>
                         <th>Phone</th>
                         <th>Type</th>
                         <th>Plan</th>
                         <th>Start Date</th>
                         <th>End Date</th>
+                        <th>Remaining Days</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -38,7 +39,7 @@
                     <tr>
 
                         <td>
-                            <div class="member-user-cell">
+                            <div class="trainer-cell">
                                 <img src="{{ url_for('static', filename='images/' + (m.profile.image if m.profile else 'about.png')) }}" class="user-img">
                                 <span class="member-name">{{ m.name }}</span>
                             </div>
@@ -58,6 +59,36 @@
 
                         <td>{{ m.profile.start_date.strftime('%d-%B-%y') if m.profile and m.profile.start_date else '-' }}</td>
                         <td>{{ m.profile.end_date.strftime('%d-%B-%y') if m.profile and m.profile.end_date else '-' }}</td>
+
+                        <td>
+                            {% if m.remaining_days is not none %}
+                                
+                                {% if m.remaining_days > 15 %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle-fill me-1"></i>
+                                        {{ m.remaining_days }} days left
+                                    </span>
+
+                                {% elif m.remaining_days > 0 %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                        {{ m.remaining_days }} days left
+                                    </span>
+
+                                {% else %}
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-x-circle-fill me-1"></i>
+                                        Expired
+                                    </span>
+                                {% endif %}
+
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-dash-circle me-1"></i>
+                                    No Plan
+                                </span>
+                            {% endif %}
+                        </td>
 
                         <td>
                             <i class="bi bi-eye action-icon text-info"

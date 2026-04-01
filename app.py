@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, session
-from models import db, User, Plan, PlanFeature, Profile
+from models import db, User, Plan, PlanFeature, Profile, Employee, Trainer, Salary
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os, uuid
@@ -97,7 +97,8 @@ def home():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    return render_template('home.html')
+    trainers = Trainer.query.all()
+    return render_template('home.html', trainers=trainers)
 
 
 # 👇 Profile renders HTML
@@ -182,6 +183,17 @@ def members():
     
     users = User.query.all()
     plans = Plan.query.all()
+
+    today = datetime.now().date()
+
+    for user in users:
+        remaining_days = None
+
+        if user.profile and user.profile.end_date:
+            end_date = user.profile.end_date.date() if isinstance(user.profile.end_date, datetime) else user.profile.end_date
+            remaining_days = (end_date - today).days
+
+        user.remaining_days = remaining_days
 
     return render_template('members.html', members=users, plans=plans)
 
@@ -442,6 +454,345 @@ def contact():
         return redirect(url_for('login'))
     
     return render_template('contact.html')
+
+
+# 👇 Employees Page
+@app.route('/employees')
+def employees():
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('user_type') != 'Admin':
+        flash('Unauthorized access!', 'error')
+        return redirect(url_for('home'))
+
+    employees = Employee.query.all()
+
+    return render_template('employee.html', employees=employees)
+
+
+# 👇 Add Employee
+@app.route('/admin/add-employee', methods=['POST'])
+def add_employee():
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('user_type') != 'Admin':
+        flash('Unauthorized access!', 'error')
+        return redirect(url_for('home'))
+
+    name = request.form.get('name')
+    email = request.form.get('email')
+    phone = request.form.get('phone')
+    dob = request.form.get('dob')
+    gender = request.form.get('gender')
+    employee_type = request.form.get('employee_type')
+    joining_date = request.form.get('joining_date')
+    image = request.files.get('image') 
+
+    speciality = request.form.get('speciality')
+    trainer_type = request.form.get('trainer_type')
+    pt_monthly_fee = request.form.get('pt_monthly_fee')
+
+    salary_amount = request.form.get('salary_amount')
+
+    joining_date_obj = datetime.strptime(joining_date, '%Y-%m-%d').date()
+
+    employee = Employee(
+        name=name,
+        email=email if email else None,
+        phone=phone if phone else None,
+        dob=datetime.strptime(dob, '%Y-%m-%d').date(),
+        gender=gender,
+        employee_type=employee_type,
+        joining_date=joining_date_obj
+    )
+
+    # 👇 IMAGE UPLOAD LOGIC
+    if image and image.filename != "":
+        filename = secure_filename(image.filename)
+        unique_name = f"{uuid.uuid4()}_{filename}"
+
+        image_path = os.path.join(
+            app.config['UPLOAD_FOLDER'],
+            unique_name
+        )
+        image.save(image_path)
+        employee.image = unique_name
+
+    db.session.add(employee)
+    db.session.commit()
+
+    if employee_type == "Trainer":
+        trainer = Trainer(
+            employee_id=employee.id,
+            speciality=speciality,
+            trainer_type=trainer_type,
+            pt_monthly_fee=pt_monthly_fee if pt_monthly_fee else None
+        )
+        db.session.add(trainer)
+
+    start_month = joining_date_obj.month
+    year = joining_date_obj.year
+
+    for month in range(start_month, 13):
+        salary = Salary(
+            employee_id=employee.id,
+            month=month,
+            year=year,
+            amount=salary_amount,
+            credited=False
+        )
+        db.session.add(salary)
+
+    db.session.commit()
+
+    flash('Employee added successfully!', 'success')
+    return redirect(url_for('employees'))
+
+
+# 👇 Update Employee
+@app.route('/admin/update-employee', methods=['POST'])
+def update_employee():
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('user_type') != 'Admin':
+        flash('Unauthorized access!', 'error')
+        return redirect(url_for('home'))
+
+    employee_id = request.form.get('employee_id')
+
+    employee = Employee.query.get(employee_id)
+
+    if not employee:
+        flash('Employee not found!', 'error')
+        return redirect(url_for('employees'))
+
+    employee.name = request.form.get('name')
+    employee.dob = datetime.strptime(
+        request.form.get('dob'),
+        '%Y-%m-%d'
+    ).date()
+
+    employee.gender = request.form.get('gender')
+    employee.email = request.form.get('email') 
+    employee.phone = request.form.get('phone') 
+    image = request.files.get('image') 
+
+    employee.joining_date = datetime.strptime(
+        request.form.get('joining_date'),
+        '%Y-%m-%d'
+    ).date()
+
+    # 👇 IMAGE UPLOAD LOGIC
+    if image and image.filename != "":
+        filename = secure_filename(image.filename)
+        unique_name = f"{uuid.uuid4()}_{filename}"
+
+        image_path = os.path.join(
+            app.config['UPLOAD_FOLDER'],
+            unique_name
+        )
+        image.save(image_path)
+        employee.image = unique_name
+
+    db.session.commit()
+
+    flash('Employee updated successfully!', 'success')
+    return redirect(url_for('employees'))
+
+
+# 👇 Delete Employee
+@app.route('/admin/delete-employee', methods=['POST'])
+def delete_employee():
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('user_type') != 'Admin':
+        flash('Unauthorized access!', 'error')
+        return redirect(url_for('home'))
+
+    employee_id = request.form.get('employee_id')
+
+    employee = Employee.query.get(employee_id)
+
+    if not employee:
+        flash('Employee not found!', 'error')
+        return redirect(url_for('employees'))
+
+    db.session.delete(employee)
+    db.session.commit()
+
+    flash('Employee deleted successfully!', 'success')
+    return redirect(url_for('employees'))
+
+
+# 👇 Trainers Page
+@app.route('/trainers')
+def trainers():
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('user_type') != 'Admin':
+        flash('Unauthorized access!', 'error')
+        return redirect(url_for('home'))
+
+    trainers = Trainer.query.all()
+
+    return render_template('trainers.html', trainers=trainers)
+
+
+# 👇 Update Trainer
+@app.route('/admin/update-trainer', methods=['POST'])
+def update_trainer():
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('user_type') != 'Admin':
+        flash('Unauthorized access!', 'error')
+        return redirect(url_for('home'))
+
+    trainer_id = request.form.get('trainer_id')
+
+    trainer = db.session.get(Trainer, trainer_id)
+
+    if not trainer:
+        flash('Trainer not found!', 'error')
+        return redirect(url_for('trainers'))
+
+    trainer.speciality = request.form.get('speciality')
+    trainer.trainer_type = request.form.get('trainer_type')
+    trainer.pt_monthly_fee = request.form.get('pt_monthly_fee')
+
+    db.session.commit()
+
+    flash('Trainer updated successfully!', 'success')
+    return redirect(url_for('trainers'))
+
+
+# 👇 Salary Page
+@app.route('/salary')
+def salary():
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('user_type') != 'Admin':
+        flash('Unauthorized access!', 'error')
+        return redirect(url_for('home'))
+
+    employees = Employee.query.all()
+
+    current_date = datetime.now()
+    current_year = current_date.year
+    current_month = current_date.month
+
+    salary_data = []
+
+    for emp in employees:
+
+        # Decide start month
+        if emp.joining_date.year == current_year:
+            start_month = emp.joining_date.month
+        else:
+            start_month = 1
+
+        # Get last known salary amount
+        last_salary = Salary.query.filter_by(
+            employee_id=emp.id
+        ).order_by(Salary.year.desc(), Salary.month.desc()).first()
+
+        salary_amount = last_salary.amount if last_salary else 0
+
+        # Create missing salary rows
+        for month in range(start_month, 13):
+
+            existing_salary = Salary.query.filter_by(
+                employee_id=emp.id,
+                year=current_year,
+                month=month
+            ).first()
+
+            if not existing_salary:
+                new_salary = Salary(
+                    employee_id=emp.id,
+                    month=month,
+                    year=current_year,
+                    amount=salary_amount,
+                    credited=False
+                )
+                db.session.add(new_salary)
+
+        db.session.commit()
+
+        # Fetch again after creating missing rows
+        salaries = Salary.query.filter(
+            Salary.employee_id == emp.id,
+            Salary.year == current_year,
+            Salary.month >= start_month
+        ).order_by(Salary.month).all()
+
+        # Select current month salary by default
+        selected_salary = next(
+            (
+                sal for sal in salaries
+                if sal.month == current_month
+            ),
+            salaries[0]
+        )
+
+        salary_data.append({
+            "employee": emp,
+            "salaries": salaries,
+            "current_month": current_month,
+            "selected_salary": selected_salary
+        })
+
+    return render_template(
+        'salary.html',
+        salary_data=salary_data
+    )
+
+
+# 👇 Credit Salary
+@app.route('/admin/credit-salary', methods=['POST'])
+def credit_salary():
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('user_type') != 'Admin':
+        flash('Unauthorized access!', 'error')
+        return redirect(url_for('home'))
+
+    employee_id = request.form.get('employee_id')
+    month = request.form.get('month')
+    year = datetime.now().year
+
+    salary = Salary.query.filter_by(
+        employee_id=employee_id,
+        month=month,
+        year=year
+    ).first()
+
+    if not salary:
+        flash('Salary record not found!', 'error')
+        return redirect(url_for('salary'))
+
+    salary.credited = True
+    salary.credited_on = datetime.now()
+
+    db.session.commit()
+
+    flash('Salary credited successfully!', 'success')
+    return redirect(url_for('salary'))
 
 
 if __name__ == "__main__":

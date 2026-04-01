@@ -62,42 +62,23 @@
 
     <div class="container text-center">
         <h2 class="section-title mb-5">Our Trainers</h2>
-
         <div class="row">
-
-            <!-- Trainer 1 -->
+            {% for trainer in trainers %}
             <div class="col-md-4 mb-4">
                 <div class="trainer-card">
-                    <img src="{{ url_for('static', filename='images/about.png') }}" class="trainer-img" alt="trainer">
+                    <img 
+                        src="{{ url_for('static', filename='images/' + (trainer.employee.image if trainer.employee.image else 'about.png')) }}" 
+                        class="trainer-img"
+                    >
+
                     <div class="trainer-info">
-                        <h5>Rahul Sharma</h5>
-                        <p>Strength & Conditioning</p>
+                        <h5>{{ trainer.employee.name }}</h5>
+                        <p>{{ trainer.speciality }}</p>
+                        <small>{{ trainer.trainer_type }}</small>
                     </div>
                 </div>
             </div>
-
-            <!-- Trainer 2 -->
-            <div class="col-md-4 mb-4">
-                <div class="trainer-card">
-                    <img src="{{ url_for('static', filename='images/about.png') }}" class="trainer-img" alt="trainer">
-                    <div class="trainer-info">
-                        <h5>Neha Patel</h5>
-                        <p>Yoga & Flexibility</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Trainer 3 -->
-            <div class="col-md-4 mb-4">
-                <div class="trainer-card">
-                    <img src="{{ url_for('static', filename='images/about.png') }}" class="trainer-img" alt="trainer">
-                    <div class="trainer-info">
-                        <h5>Amit Verma</h5>
-                        <p>Weight Loss Expert</p>
-                    </div>
-                </div>
-            </div>
-
+            {% endfor %}
         </div>
     </div>
 

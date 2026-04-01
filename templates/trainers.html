@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="members-section">
+    <div class="container">
+        <h2 class="d-flex justify-content-center align-items-center mb-4 text-white">Trainers</h2>
+
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th class="d-flex flex-start" style="padding-left:100px;">Name</th>
+                        <th>Speciality</th>
+                        <th>Trainer Type</th>
+                        <th>PT Fee</th>
+                        <th>Email</th>
+                        <th>Contact</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for tr in trainers %}
+                    <tr>
+                        <td>
+                            <div class="trainer-cell">
+                                <img 
+                                    src="{{ url_for('static', filename='images/' + (tr.employee.image if tr.employee.image else 'about.png')) }}" 
+                                    class="user-img"
+                                >
+                                <span class="member-name">
+                                    {{ tr.employee.name }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>{{ tr.speciality }}</td>
+                        <td>{{ tr.trainer_type }}</td>
+                        <td>{{ tr.pt_monthly_fee }}</td>
+                        <td>{{ tr.employee.email }}</td>
+                        <td>{{ tr.employee.phone }}</td>
+                        <td>
+                            <i class="bi bi-pencil text-info action-icon"
+                               data-bs-toggle="modal"
+                               data-bs-target="#editTrainer{{ tr.id }}"
+                            ></i>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+{% for tr in trainers %}
+<div class="modal fade" id="editTrainer{{ tr.id }}">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <form method="POST" action="/admin/update-trainer">
+                <input type="hidden" name="trainer_id" value="{{ tr.id }}">
+
+                <div class="modal-header">
+                    <h5>Edit Trainer</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label>Speciality</label>
+                        <input 
+                            class="form-control" 
+                            name="speciality" 
+                            value="{{ tr.speciality }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Trainer Type</label>
+                        <select name="trainer_type" class="form-control" required>
+                            <option value="General Trainer"
+                                {% if tr.trainer_type == 'General Trainer' %}selected{% endif %}>
+                                General Trainer
+                            </option>
+
+                            <option value="Personal Trainer"
+                                {% if tr.trainer_type == 'Personal Trainer' %}selected{% endif %}>
+                                Personal Trainer
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>PT Monthly Fee</label>
+                        <input 
+                            type="number"
+                            class="form-control" 
+                            name="pt_monthly_fee" 
+                            value="{{ tr.pt_monthly_fee }}"
+                        >
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-hero">Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

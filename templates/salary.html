@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="members-section">
+    <div class="container">
+        <h2 class="text-center text-white mb-4">Salary Management</h2>
+
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th class="d-flex flex-start" style="padding-left:100px;">Name</th>
+                        <th>Month</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Credited Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in salary_data %}
+                    <tr>
+                        <!-- Employee -->
+                        <td>
+                            <div class="trainer-cell">
+                                <img 
+                                    src="{{ url_for('static', filename='images/' + (item.employee.image if item.employee.image else 'about.png')) }}" 
+                                    class="user-img"
+                                >
+                                <span>{{ item.employee.name }}</span>
+                            </div>
+                        </td>
+
+                        <!-- Month Dropdown -->
+                        <td>
+                            <select 
+                                class="form-control salary-month-dropdown"
+                                onchange="updateSalaryRow(this)"
+                            >
+                                {% for sal in item.salaries %}
+                                <option
+                                    value="{{ sal.month }}"
+                                    data-status="{{ 'Credited' if sal.credited else 'Pending' }}"
+                                    data-date="{{ sal.credited_on.strftime('%d-%m-%Y %I:%M %p') if sal.credited_on else '-' }}"
+                                    data-amount="{{ sal.amount }}"
+                                    data-credited="{{ 'true' if sal.credited else 'false' }}"
+                                    {% if sal.month > item.current_month %}disabled{% endif %}
+                                    {% if sal.month == item.current_month %}selected{% endif %}
+                                >
+                                    {{ [
+                                        '', 'January', 'February', 'March',
+                                        'April', 'May', 'June',
+                                        'July', 'August', 'September',
+                                        'October', 'November', 'December'
+                                    ][sal.month] }}-{{ sal.year }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </td>
+
+                        <!-- Amount -->
+                        <td class="salary-amount">
+                            {{ item.selected_salary.amount }}
+                        </td>
+
+                        <!-- Status -->
+                        <td class="salary-status">
+                            {% if item.selected_salary.credited %}
+                                <span class="salary-success fw-bold">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Credited
+                                </span>
+                            {% else %}
+                                <span class="salary-pending fw-bold">
+                                    <i class="bi bi-clock-fill me-1"></i> Pending
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Credited Date -->
+                        <td class="salary-date">
+                            {% if item.selected_salary.credited_on %}
+                                {{ item.selected_salary.credited_on.strftime('%d-%m-%Y %I:%M %p') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <!-- Action -->
+                        <td>
+                            <form method="POST" action="/admin/credit-salary">
+                                <input type="hidden" name="employee_id" value="{{ item.employee.id }}">
+                                <input 
+                                    type="hidden" 
+                                    name="month" 
+                                    class="selected-month" 
+                                    value="{{ item.selected_salary.month }}"
+                                >
+
+                                <button 
+                                    class="btn btn-success btn-sm credit-btn"
+                                    {% if item.selected_salary.credited %}disabled{% endif %}
+                                >
+                                    Credit
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function updateSalaryRow(select) {
+        const row = select.closest("tr");
+        const option = select.options[select.selectedIndex];
+
+        const amount = option.dataset.amount;
+        const status = option.dataset.status;
+        const date = option.dataset.date;
+        const isCredited = option.dataset.credited === "true";
+
+        row.querySelector(".salary-amount").innerText = amount;
+
+        row.querySelector(".salary-status").innerHTML =
+            isCredited ? '<span class="salary-success"><i class="bi bi-check-circle-fill me-1"></i> Credited</span>'
+            : '<span class="salary-pending"><i class="bi bi-clock-fill me-1"></i> Pending</span>';
+
+        row.querySelector(".salary-date").innerText = date;
+
+        row.querySelector(".selected-month").value = option.value;
+
+        const creditBtn = row.querySelector(".credit-btn");
+        creditBtn.disabled = isCredited;
+    }
+</script>
+
+{% endblock %}

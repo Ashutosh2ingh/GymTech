@@ -40,6 +40,27 @@
                             </a>
                         </li>
                     {% endif %}
+                    {% if session.get('user_type') == 'Admin' %}
+                        <li class="nav-item ps-3">
+                            <a class="nav-link text-decoration-none text-white {% if request.endpoint == 'employees' %}active-nav{% endif %}" href="/employees">
+                                Employees
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if session.get('user_type') == 'Admin' %}
+                        <li class="nav-item ps-3">
+                            <a class="nav-link text-decoration-none text-white {% if request.endpoint == 'trainers' %}active-nav{% endif %}" href="/trainers">
+                                Trainers
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if session.get('user_type') == 'Admin' %}
+                        <li class="nav-item ps-3">
+                            <a class="nav-link text-decoration-none text-white {% if request.endpoint == 'salary' %}active-nav{% endif %}" href="/salary">
+                                Salary
+                            </a>
+                        </li>
+                    {% endif %}
                     <li class="nav-item ps-3">
                         <a class="nav-link text-decoration-none text-white {% if request.endpoint == 'contact' %}active-nav{% endif %}" href="/contact">
                             Contact
@@ -107,6 +128,17 @@
                     : "No file selected";
 
                 document.getElementById("file-name").innerText = fileName;
+            }
+        </script>
+        <script>
+            function updateEmpFileName(input, empId) {
+                const fileNameSpan = document.getElementById(`file-name-${empId}`);
+
+                if (input.files.length > 0) {
+                    fileNameSpan.innerText = input.files[0].name;
+                } else {
+                    fileNameSpan.innerText = "No file selected";
+                }
             }
         </script>
         <script>

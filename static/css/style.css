@@ -277,6 +277,15 @@
   color: #2ec4b6;
   font-size: 14px;
 }
+
+.trainer-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 220px;
+  justify-content: flex-start;
+  padding-left: 12px;
+}
 /* End Trainsers Section */
 
 /* Start Footer */
@@ -506,13 +515,6 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #0f3d3e, #123f3f);
   padding-top: 40px;
-}
-
-.member-user-cell {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 220px;
 }
 
 .member-name {
@@ -748,3 +750,37 @@
   font-size: 14px;
 }
 /* End Profile Section */
+
+/* Salary Section Start */
+.salary-month-dropdown {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border-radius: 10px;
+  padding: 8px 12px;
+  min-width: 160px;
+  box-shadow: none;
+}
+
+.salary-month-dropdown:focus {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  box-shadow: none;
+  color: white !important;
+}
+
+.salary-month-dropdown option {
+  background: #1f2937;
+  color: white;
+}
+
+.salary-success {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.salary-pending {
+  color: #ef4444;
+  font-weight: 600;
+}
+/* Salary Section End */
