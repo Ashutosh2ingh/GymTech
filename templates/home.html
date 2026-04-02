@@ -11,12 +11,12 @@
                 <h1 class="hero-title">
                     Complete Daily <br>
                     <span class="highlight">Workout</span> At <br>
-                    Home
+                    Gym
                 </h1>
 
                 <p class="hero-desc mt-3">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                    Minima sunt sed tempora neque molestiae corrupti nobis harum ullam eos nam!
+                    Transform your body with expert training, modern equipment,
+                    and personalized workout plans designed to build strength, stamina.
                 </p>
 
                 <button class="btn btn-hero mt-4">Get Started Now</button>
@@ -44,15 +44,15 @@
         <h2 class="about-title mb-4">ABOUT US</h2>
 
         <p class="about-text">
-            Founded in June 2015 by Mr. Vijay Singh Senger, Gym Lounge India began its journey with just 8 dedicated staff members and a vision to revolutionize fitness culture in Gujarat.
+            Founded with a vision by <strong class="fs-5">Ashutosh Singh</strong>, GymTech was created to redefine the fitness experience by combining modern training methods, advanced equipment, and a motivating environment for every fitness enthusiast.
             <br><br>
-            Today, that vision has grown into reality — with 24 outlets across the state and a strong team of 300+ fitness professionals, Gym Lounge India proudly stands as the largest gym chain in Gujarat.
+            What started as a passion for health and wellness has grown into a complete fitness platform focused on helping individuals build strength, improve endurance, and achieve their personal transformation goals.
             <br><br>
-            Over the years, our brand has become synonymous with quality fitness, innovation, and excellence. Our grand gym inaugurations have witnessed visits from renowned celebrities, adding to our growing reputation and community presence.
+            At GymTech, we believe fitness is not just about workouts — it is about building confidence, discipline, and a healthier lifestyle. Our expert trainers and customized workout plans are designed to support members at every stage of their fitness journey.
             <br><br>
-            With numerous prestigious awards recognizing our excellence in fitness and customer satisfaction, Gym Lounge India has firmly established itself as the No. 1 gym brand in Gujarat.
+            With a commitment to excellence, innovation, and member satisfaction, GymTech continues to inspire people to push their limits and become the strongest version of themselves.
             <br><br>
-            Guided by the visionary leadership of Mr. Vijay Singh Senger, we are now gearing up for our next big milestone — expanding our presence across India. Our mission is to empower individuals nationwide to live healthier, stronger, and more confident lives through fitness.
+            Led by the vision of <strong>Ashutosh Singh</strong>, our mission is to empower individuals to live healthier, stronger, and more confident lives through fitness and dedication.
         </p>
     </div>
 
@@ -62,23 +62,27 @@
 
     <div class="container text-center">
         <h2 class="section-title mb-5">Our Trainers</h2>
-        <div class="row">
-            {% for trainer in trainers %}
-            <div class="col-md-4 mb-4">
-                <div class="trainer-card">
-                    <img 
-                        src="{{ url_for('static', filename='images/' + (trainer.employee.image if trainer.employee.image else 'about.png')) }}" 
-                        class="trainer-img"
-                    >
 
-                    <div class="trainer-info">
-                        <h5>{{ trainer.employee.name }}</h5>
-                        <p>{{ trainer.speciality }}</p>
-                        <small>{{ trainer.trainer_type }}</small>
+        <div class="trainers-slider-wrapper">
+            <div class="trainers-slider" id="trainersSlider">
+                {% for trainer in trainers %}
+                <div class="trainer-slide">
+                    <div class="trainer-card">
+                        <img 
+                            src="{{ url_for('static', filename='images/' + (trainer.employee.image if trainer.employee.image else 'about.png')) }}" 
+                            class="trainer-img"
+                        >
+
+                        <div class="trainer-info">
+                            <h5>{{ trainer.employee.name }}</h5>
+                            <p>{{ trainer.speciality }}</p>
+                            <small>{{ trainer.trainer_type }}</small>
+                            <p>₹{{ trainer.pt_monthly_fee }}</p>
+                        </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
     </div>
 
@@ -91,12 +95,14 @@
             <!-- LEFT: LOGO + BRAND -->
             <div class="col-md-4 text-center text-md-start mb-4 mb-md-0">
                 <div class="footer-brand d-flex align-items-center justify-content-center justify-content-md-start">
+                    <a href="/" class="text-decoration-none">
                     <img 
                         src="{{ url_for('static', filename='images/logo.png') }}" 
                         alt="GymTech Logo"
                         class="footer-logo"
                     >
                     <span class="footer-brand-text ms-2">GymTech</span>
+                    </a>
                 </div>
                 <p class="footer-desc mt-3">
                     Your ultimate fitness partner for strength, health, and transformation.

@@ -33,6 +33,11 @@
                             Plans
                         </a>
                     </li>
+                    <li class="nav-item ps-3">
+                        <a class="nav-link text-decoration-none text-white {% if request.endpoint == 'equipments' %}active-nav{% endif %}" href="/equipments">
+                            Equipments
+                        </a>
+                    </li>
                     {% if session.get('user_type') == 'Admin' %}
                         <li class="nav-item ps-3">
                             <a class="nav-link text-decoration-none text-white {% if request.endpoint == 'members' %}active-nav{% endif %}" href="/members">
@@ -143,22 +148,36 @@
         </script>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
-                const slider = document.getElementById("plansSlider");
-                let currentIndex = 0;
 
-                slider.addEventListener("wheel", function (e) {
-                    e.preventDefault();
+                function initSlider(sliderId) {
+                    const slider = document.getElementById(sliderId);
 
-                    const totalSlides = slider.children.length;
+                    if (!slider) return;
 
-                    if (e.deltaY > 0 && currentIndex < totalSlides - 3) {
-                        currentIndex++;
-                    } else if (e.deltaY < 0 && currentIndex > 0) {
-                        currentIndex--;
-                    }
+                    let currentIndex = 0;
+                    const visibleCards = 3;
+                    const slideWidth = 100 / visibleCards;
 
-                    slider.style.transform = `translateX(-${currentIndex * 33.333}%)`;
-                });
+                    slider.addEventListener("wheel", function (e) {
+                        e.preventDefault();
+
+                        const totalSlides = slider.children.length;
+                        const maxIndex = totalSlides - visibleCards;
+
+                        if (e.deltaY > 0 && currentIndex < maxIndex) {
+                            currentIndex++;
+                        } 
+                        else if (e.deltaY < 0 && currentIndex > 0) {
+                            currentIndex--;
+                        }
+
+                        slider.style.transform =
+                            `translateX(-${currentIndex * slideWidth}%)`;
+                    });
+                }
+
+                initSlider("plansSlider");
+                initSlider("trainersSlider");
             });
         </script>
     </body>

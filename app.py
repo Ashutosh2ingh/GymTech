@@ -106,10 +106,55 @@ def home():
 def profile():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    
+
     user = User.query.get(session['user_id'])
 
-    return render_template('profile.html', user=user)
+    remaining_days = None
+    total_paid = 0
+    plan_expired = False
+
+    if user and user.profile and user.profile.plan:
+        today = datetime.now().date()
+
+        if user.profile.end_date:
+            end_date = (
+                user.profile.end_date.date()
+                if isinstance(user.profile.end_date, datetime)
+                else user.profile.end_date
+            )
+
+            remaining_days = (end_date - today).days
+
+            if remaining_days <= 0:
+                plan_expired = True
+                remaining_days = 0
+                total_paid = 0
+            else:
+                start_date = (
+                    user.profile.start_date.date()
+                    if isinstance(user.profile.start_date, datetime)
+                    else user.profile.start_date
+                )
+
+                months_selected = max(
+                    1,
+                    (
+                        (end_date.year - start_date.year) * 12
+                        + (end_date.month - start_date.month)
+                    )
+                )
+
+                total_paid = (
+                    user.profile.plan.price * months_selected
+                )
+
+    return render_template(
+        'profile.html',
+        user=user,
+        remaining_days=remaining_days,
+        total_paid=total_paid,
+        plan_expired=plan_expired
+    )
 
 
 # 👇 Update Profile
@@ -794,6 +839,15 @@ def credit_salary():
     flash('Salary credited successfully!', 'success')
     return redirect(url_for('salary'))
 
+
+# 👇 Equipments renders HTML
+@app.route('/equipments')
+def equipments():
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    return render_template('equipments.html')
 
 if __name__ == "__main__":
     app.run(debug=True)

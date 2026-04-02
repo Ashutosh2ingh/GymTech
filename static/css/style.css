@@ -276,6 +276,7 @@
 .trainer-info p {
   color: #2ec4b6;
   font-size: 14px;
+  margin-bottom: 5px;
 }
 
 .trainer-cell {
@@ -286,6 +287,36 @@
   justify-content: flex-start;
   padding-left: 12px;
 }
+
+.trainers-slider-wrapper {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.trainers-slider {
+  display: flex;
+  transition: transform 0.4s ease-in-out;
+}
+
+.trainer-slide {
+  min-width: 33.333%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.table-container-trainer {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.3);
+  max-height: calc(100vh - 205px);
+  overflow-y: auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+} 
 /* End Trainsers Section */
 
 /* Start Footer */
@@ -387,7 +418,7 @@
 /* Start Plans Section */
 .plans-section {
   background: linear-gradient(135deg, #0f3d3e, #123f3f);
-  min-height: 91.65vh;
+  min-height: calc(100vh - 60px);
   padding: 40px 0;
 }
 
@@ -512,7 +543,7 @@
 
 /* Start Members Section */
 .members-section {
-  min-height: 100vh;
+  min-height: calc(100vh - 60px);
   background: linear-gradient(135deg, #0f3d3e, #123f3f);
   padding-top: 40px;
 }
@@ -535,6 +566,12 @@
   border-radius: 15px;
   padding: 20px;
   box-shadow: 0 0 30px rgba(0,0,0,0.3);
+  max-height: calc(100vh - 285px);
+  overflow-y: auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  margin-top: 40px;
 }
 
 .custom-table {
@@ -666,11 +703,48 @@
   background: #0a2c2c;
   color: white;
 }
+
+.top-bar-row {
+  gap: 20px;
+}
+
+.count-card {
+  min-width: 180px;
+  padding: 12px 20px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 20px rgba(0,0,0,0.25);
+  color: white;
+  text-align: center;
+}
+
+.count-card h6 {
+  margin: 0;
+  font-size: 14px;
+  color: #2ec4b6;
+  font-weight: 600;
+}
+
+.count-card span {
+  font-size: 28px;
+  font-weight: 700;
+  display: block;
+  margin-top: 4px;
+}
+
+.page-heading {
+  color: white;
+  font-size: 40px;
+  font-weight: 700;
+  flex: 1;
+  text-align: center;
+}
 /* End Members Section */
 
 /* Start Profile Section */
 .profile-section {
-  min-height: 91.65vh;
+  min-height: calc(100vh - 60px);
   background: linear-gradient(135deg, #0f3d3e, #123f3f);
 }
 
@@ -783,4 +857,17 @@
   color: #ef4444;
   font-weight: 600;
 }
+
+.table-container-salary {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.3);
+  max-height: calc(100vh - 205px);
+  overflow-y: auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+} 
 /* Salary Section End */

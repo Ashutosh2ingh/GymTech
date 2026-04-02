@@ -33,7 +33,9 @@
             <div class="info-box">
                 <span>Plan</span>
                 <p>
-                    {% if user.profile and user.profile.plan %}
+                    {% if plan_expired %}
+                        Plan Expired
+                    {% elif user.profile and user.profile.plan %}
                         {{ user.profile.plan.name }}
                     {% else %}
                         No Plan Selected
@@ -44,7 +46,9 @@
             <div class="info-box">
                 <span>Price</span>
                 <p>
-                    {% if user.profile and user.profile.plan %}
+                    {% if plan_expired %}
+                        ₹0
+                    {% elif user.profile and user.profile.plan %}
                         ₹{{ user.profile.plan.price }}/month
                     {% else %}
                         --
@@ -71,6 +75,46 @@
                     {% else %}
                         Not Available
                     {% endif %}
+                </p>
+            </div>
+
+            <div class="info-box">
+                <span>Days Remaining</span>
+                <p>
+                    {% if remaining_days is not none %}
+
+                        {% if remaining_days > 15 %}
+                            <span class="text-success fw-bold">
+                                <i class="bi bi-check-circle-fill me-1"></i>
+                                {{ remaining_days }} days left
+                            </span>
+
+                        {% elif remaining_days > 0 %}
+                            <span class="text-warning fw-bold">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                {{ remaining_days }} days left
+                            </span>
+
+                        {% else %}
+                            <span class="text-danger fw-bold">
+                                <i class="bi bi-x-circle-fill me-1"></i>
+                                Expired
+                            </span>
+                        {% endif %}
+
+                    {% else %}
+                        <span class="text-secondary fw-bold">
+                            <i class="bi bi-dash-circle me-1"></i>
+                            No Plan
+                        </span>
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="info-box">
+                <span>Total Amount Paid</span>
+                <p>
+                    ₹{{ total_paid }}
                 </p>
             </div>
 
