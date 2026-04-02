@@ -849,5 +849,6 @@ def equipments():
 
     return render_template('equipments.html')
 
+
 if __name__ == "__main__":
     app.run(debug=True)
