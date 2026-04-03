@@ -57,18 +57,51 @@
                         <td>{{ m.profile.user_type if m.profile else '' }}</td>
 
                         <td>
-                            {% if m.profile and m.profile.plan %}
+                            {% if m.profile and m.profile.user_type == 'Admin' %}
+                                <span class="text-secondary fw-bold">
+                                    <i class="bi bi-dash-circle me-1"></i>
+                                    N/A
+                                </span>
+                            {% elif m.profile and m.profile.plan %}
                                 {{ m.profile.plan.name }}
                             {% else %}
                                 None
                             {% endif %}
                         </td>
 
-                        <td>{{ m.profile.start_date.strftime('%d-%B-%y') if m.profile and m.profile.start_date else '-' }}</td>
-                        <td>{{ m.profile.end_date.strftime('%d-%B-%y') if m.profile and m.profile.end_date else '-' }}</td>
+                        <td>
+                            {% if m.profile and m.profile.user_type == 'Admin' %}
+                                <span class="text-secondary fw-bold">
+                                    <i class="bi bi-dash-circle me-1"></i>
+                                    N/A
+                                </span>
+                            {% elif m.profile and m.profile.start_date %}
+                                {{ m.profile.start_date.strftime('%d-%B-%y') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
 
                         <td>
-                            {% if m.remaining_days is not none %}
+                            {% if m.profile and m.profile.user_type == 'Admin' %}
+                                <span class="text-secondary fw-bold">
+                                    <i class="bi bi-dash-circle me-1"></i>
+                                    N/A
+                                </span>
+                            {% elif m.profile and m.profile.end_date %}
+                                {{ m.profile.end_date.strftime('%d-%B-%y') }}
+                            {% else %}
+                                -
+                            {% endif %} 
+                        </td>
+
+                        <td>
+                            {% if m.profile and m.profile.user_type == 'Admin' %}
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-dash-circle me-1"></i>
+                                    N/A
+                                </span>
+                            {% elif m.remaining_days is not none %}
                                 
                                 {% if m.remaining_days > 15 %}
                                     <span class="badge bg-success">
@@ -160,20 +193,20 @@
                     <!-- PLAN -->
                     <div class="row g-3 mt-2">
                         <div class="col-md-6">
-                            <label class="form-label">Plan</label>
-                            <select name="plan_id" class="form-control">
-                                <option value="">None</option>
-                                {% for p in plans %}
-                                    <option value="{{ p.id }}">{{ p.name }}</option>
-                                {% endfor %}
+                            <label class="form-label">User Type</label>
+                            <select name="user_type" class="form-control" id="addUserType" onchange="toggleAddPlanFields()">
+                                <option value="Member" selected>Member</option>
+                                <option value="Admin">Admin</option>
                             </select>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">User Type</label>
-                            <select name="user_type" class="form-control">
-                                <option value="Member" selected>Member</option>
-                                <option value="Admin">Admin</option>
+                            <label class="form-label">Plan</label>
+                            <select name="plan_id" class="form-control" id="addPlanField">
+                                <option value="">None</option>
+                                {% for p in plans %}
+                                    <option value="{{ p.id }}">{{ p.name }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
@@ -182,12 +215,12 @@
                     <div class="row g-3 mt-2">
                         <div class="col-md-6">
                             <label class="form-label">Start Date</label>
-                            <input type="date" name="start_date" class="form-control">
+                            <input type="date" name="start_date" class="form-control" id="addStartDate">
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">End Date</label>
-                            <input type="date" name="end_date" class="form-control">
+                            <input type="date" name="end_date" class="form-control" id="addEndDate">
                         </div>
                     </div>
 
@@ -213,6 +246,7 @@
 
 <!-- 🔍 VIEW MODAL -->
 <div class="modal fade" id="viewModal{{ m.id }}" tabindex="-1">
+    {% set is_admin = m.profile and m.profile.user_type == 'Admin' %}
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
 
@@ -247,7 +281,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Plan</label>
-                            <select name="plan_id" class="form-control">
+                            <select name="plan_id" class="form-control" {% if is_admin %}disabled{% endif %}>
                                 <option value="">None</option>
                                 {% for p in plans %}
                                     <option value="{{ p.id }}"
@@ -269,6 +303,7 @@
                             <input 
                                 type="date" 
                                 name="start_date"
+                                {% if is_admin %}disabled{% endif %}
                                 class="form-control"
                                 value="{{ m.profile.start_date.strftime('%Y-%m-%d') if m.profile and m.profile.start_date else '-' }}"
                             >
@@ -279,6 +314,7 @@
                                 type="date" 
                                 class="form-control"
                                 name="end_date" 
+                                {% if is_admin %}disabled{% endif %}
                                 value="{{ m.profile.end_date.strftime('%Y-%m-%d') if m.profile and m.profile.end_date else '-' }}"
                             >
                         </div>

@@ -180,5 +180,27 @@
                 initSlider("trainersSlider");
             });
         </script>
+        <script>
+            function toggleAddPlanFields() {
+                const userType = document.getElementById("addUserType").value;
+                const plan = document.getElementById("addPlanField");
+                const start = document.getElementById("addStartDate");
+                const end = document.getElementById("addEndDate");
+
+                const isAdmin = userType === "Admin";
+
+                plan.disabled = isAdmin;
+                start.disabled = isAdmin;
+                end.disabled = isAdmin;
+
+                if (isAdmin) {
+                    plan.value = "";
+                    start.value = "";
+                    end.value = "";
+                }
+            }
+
+            document.addEventListener("DOMContentLoaded", toggleAddPlanFields);
+        </script>
     </body>
 </html> 

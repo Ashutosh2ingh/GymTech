@@ -282,14 +282,16 @@ def add_member():
     db.session.add(user)
     db.session.commit()
 
+    final_user_type = user_type if user_type in ['Admin', 'Member'] else 'Member'
+
     profile = Profile(
         user_id=user.id,
         phone=phone,
         address=address,
-        user_type=user_type if user_type in ['Admin', 'Member'] else 'Member',
-        plan_id=plan_id if plan_id else None,
-        start_date=datetime.strptime(start_date, '%Y-%m-%d') if start_date else None,
-        end_date=datetime.strptime(end_date, '%Y-%m-%d') if end_date else None
+        user_type=final_user_type,
+        plan_id=None if final_user_type == 'Admin' else (plan_id if plan_id else None),
+        start_date=None if final_user_type == 'Admin' else (datetime.strptime(start_date, '%Y-%m-%d') if start_date else None),
+        end_date=None if final_user_type == 'Admin' else (datetime.strptime(end_date, '%Y-%m-%d') if end_date else None)
     )
 
     db.session.add(profile)
@@ -329,11 +331,14 @@ def update_user():
     user.profile.phone = phone
 
     # plan handling
-    user.profile.plan_id = plan_id if plan_id else None
-
-    # date handling
-    user.profile.start_date = datetime.strptime(start_date, '%Y-%m-%d') if start_date else None
-    user.profile.end_date = datetime.strptime(end_date, '%Y-%m-%d') if end_date else None
+    if user.profile.user_type == 'Admin':
+        user.profile.plan_id = None
+        user.profile.start_date = None
+        user.profile.end_date = None
+    else:
+        user.profile.plan_id = plan_id if plan_id else None
+        user.profile.start_date = (datetime.strptime(start_date, '%Y-%m-%d') if start_date else None)
+        user.profile.end_date = (datetime.strptime(end_date, '%Y-%m-%d') if end_date else None)
 
     db.session.commit()
 

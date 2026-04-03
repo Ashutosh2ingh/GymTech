@@ -31,9 +31,14 @@
             </div>
 
             <div class="info-box">
-                <span>Plan</span>
+                <span>Plan</span>   
                 <p>
-                    {% if plan_expired %}
+                    {% if user.profile and user.profile.user_type == 'Admin' %}
+                        <span class="text-secondary fw-bold">
+                            <i class="bi bi-dash-circle me-1"></i>
+                            N/A
+                        </span>
+                    {% elif plan_expired %}
                         Plan Expired
                     {% elif user.profile and user.profile.plan %}
                         {{ user.profile.plan.name }}
@@ -46,7 +51,12 @@
             <div class="info-box">
                 <span>Price</span>
                 <p>
-                    {% if plan_expired %}
+                    {% if user.profile and user.profile.user_type == 'Admin' %}
+                        <span class="text-secondary fw-bold">
+                            <i class="bi bi-dash-circle me-1"></i>
+                            N/A
+                        </span>
+                    {% elif plan_expired %}
                         ₹0
                     {% elif user.profile and user.profile.plan %}
                         ₹{{ user.profile.plan.price }}/month
@@ -59,7 +69,12 @@
             <div class="info-box">
                 <span>Start Date</span>
                 <p>
-                    {% if user.profile and user.profile.start_date %}
+                    {% if user.profile and user.profile.user_type == 'Admin' %}
+                        <span class="text-secondary fw-bold">
+                            <i class="bi bi-dash-circle me-1"></i>
+                            N/A
+                        </span>
+                    {% elif user.profile and user.profile.start_date %}
                         {{ user.profile.start_date.strftime('%d-%B-%y') }}
                     {% else %}
                         Not Started
@@ -70,7 +85,12 @@
             <div class="info-box">
                 <span>End Date</span>
                 <p>
-                    {% if user.profile and user.profile.end_date %}
+                    {% if user.profile and user.profile.user_type == 'Admin' %}
+                        <span class="text-secondary fw-bold">
+                            <i class="bi bi-dash-circle me-1"></i>
+                            N/A
+                        </span>
+                    {% elif user.profile and user.profile.end_date %}
                         {{ user.profile.end_date.strftime('%d-%B-%y') }}
                     {% else %}
                         Not Available
@@ -81,7 +101,12 @@
             <div class="info-box">
                 <span>Days Remaining</span>
                 <p>
-                    {% if remaining_days is not none %}
+                    {% if user.profile and user.profile.user_type == 'Admin' %}
+                        <span class="text-secondary fw-bold">
+                            <i class="bi bi-dash-circle me-1"></i>
+                            N/A
+                        </span>
+                    {% elif remaining_days is not none %}
 
                         {% if remaining_days > 15 %}
                             <span class="text-success fw-bold">
