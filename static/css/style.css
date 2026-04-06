@@ -317,7 +317,7 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
 } 
-/* End Trainsers Section */
+/* End Trainers Section */
 
 /* Start Footer */
 .gym-footer {
@@ -734,7 +734,7 @@
 }
 
 .page-heading {
-  color: white;
+  color: #2ec4b6;
   font-size: 40px;
   font-weight: 700;
   flex: 1;
@@ -871,3 +871,9 @@
   -ms-overflow-style: none;
 } 
 /* Salary Section End */
+
+/* Equipment Section Start */
+.equipment-section {
+  background: linear-gradient(135deg, #123f3f, #0f3d3e);
+  min-height: calc(100vh - 60px);;
+}

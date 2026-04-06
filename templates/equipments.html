@@ -1,6 +1,278 @@
 {% extends "base.html" %}
 {% block content %}
 
-<p>This is equipment</p>
+<div class="equipment-section py-5">
+
+    <div class="container">
+
+        <!-- TOP BAR -->
+        <div class="top-bar-row d-flex justify-content-between align-items-center mb-5">
+
+            <div class="count-card">
+                <h6>Total Equipments</h6>
+                <span>{{ equipments|length }}</span>
+            </div>
+
+            <h1 class="page-heading m-0 page-title">Equipments</h1>
+
+            {% if session.get('user_type') == 'Admin' %}
+            <button
+                class="btn btn-hero"
+                data-bs-toggle="modal"
+                data-bs-target="#addEquipmentModal"
+            >
+                <i class="bi bi-plus-circle me-1"></i>
+                Add Equipment
+            </button>
+            {% endif %}
+
+        </div>
+
+        <!-- EQUIPMENT CARDS -->
+        <div class="row g-4">
+            {% for equipment in equipments %}
+            <div class="col-md-4">
+                <div class="trainer-card h-100 position-relative">
+
+                    {% if session.get('user_type') == 'Admin' %}
+                    <button
+                        class="btn btn-lg btn-dark text-warning position-absolute"
+                        style="top: 10px; right: 10px; z-index: 10;"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editEquipmentModal{{ equipment.id }}"
+                    >
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    {% endif %}
+
+                    <img
+                        src="{{ url_for('static', filename='images/' + (equipment.image if equipment.image else 'about.png')) }}"
+                        class="trainer-img"
+                        alt="{{ equipment.name }}"
+                    >
+
+                    <div class="trainer-info">
+                        <h5>{{ equipment.name }}</h5>
+
+                        <p>
+                            {{ equipment.purpose.split()[:10] | join(' ') }}
+
+                            {% if equipment.purpose.split()|length > 10 %}
+                                ...
+                                <a
+                                    href="#"
+                                    class="text-info text-decoration-none fw-semibold"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#purposeModal{{ equipment.id }}"
+                                >
+                                    See More
+                                </a>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+</div>
+
+{% for equipment in equipments %}
+<div class="modal fade" id="purposeModal{{ equipment.id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold page-heading">
+                    {{ equipment.name }}
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+            </div>
+
+            <div class="modal-body">
+                <p style="line-height: 1.8;">
+                    {{ equipment.purpose }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- ADD EQUIPMENT MODAL -->
+<div class="modal fade" id="addEquipmentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Add Equipment</h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+            </div>
+
+            <form
+                method="POST"
+                action="/admin/add-equipment"
+                enctype="multipart/form-data"
+            >
+                <div class="modal-body px-4">
+
+                    <!-- EQUIPMENT NAME -->
+                    <div class="mb-3">
+                        <label class="form-label">Equipment Name</label>
+                        <input
+                            type="text"
+                            name="name"
+                            class="form-control"
+                            placeholder="Enter equipment name"
+                            required
+                        >
+                    </div>
+
+                    <!-- PURPOSE -->
+                    <div class="mb-3">
+                        <label class="form-label">Purpose / Usage</label>
+                        <textarea
+                            name="purpose"
+                            class="form-control"
+                            rows="4"
+                            placeholder="Describe what this equipment is used for"
+                            required
+                        ></textarea>
+                    </div>
+
+                    <!-- CUSTOM IMAGE UPLOAD -->
+                    <div class="custom-file-upload mt-3">
+                        <label for="equipmentImage" class="upload-btn">
+                            <i class="bi bi-image me-2"></i>
+                            Upload Image
+                        </label>
+
+                        <span id="equipment-file-name">
+                            No file selected
+                        </span>
+
+                        <input
+                            type="file"
+                            id="equipmentImage"
+                            name="image"
+                            accept="image/*"
+                            hidden
+                            onchange="updateEquipmentFileName(this)"
+                            required
+                        >
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-hero px-4">
+                        Add Equipment
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- Update EQUIPMENT MODAL -->
+{% for equipment in equipments %}
+<div class="modal fade" id="editEquipmentModal{{ equipment.id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Update Equipment</h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+            </div>
+
+            <form
+                method="POST"
+                action="/admin/update-equipment"
+                enctype="multipart/form-data"
+            >
+                <input
+                    type="hidden"
+                    name="equipment_id"
+                    value="{{ equipment.id }}"
+                >
+
+                <div class="modal-body px-4">
+
+                    <!-- EQUIPMENT NAME (READ ONLY) -->
+                    <div class="mb-3">
+                        <label class="form-label">Equipment Name</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{{ equipment.name }}"
+                            disabled
+                        >
+                    </div>
+
+                    <!-- PURPOSE -->
+                    <div class="mb-3">
+                        <label class="form-label">Purpose / Usage</label>
+                        <textarea
+                            name="purpose"
+                            class="form-control"
+                            rows="4"
+                            required
+                        >{{ equipment.purpose }}</textarea>
+                    </div>
+
+                    <!-- IMAGE -->
+                    <div class="custom-file-upload mt-3">
+                        <label
+                            for="equipmentImage{{ equipment.id }}"
+                            class="upload-btn"
+                        >
+                            <i class="bi bi-image me-2"></i>
+                            Update Image
+                        </label>
+
+                        <span id="equipment-file-name-{{ equipment.id }}">
+                            No file selected
+                        </span>
+
+                        <input
+                            type="file"
+                            id="equipmentImage{{ equipment.id }}"
+                            name="image"
+                            accept="image/*"
+                            hidden
+                            onchange="updateEditEquipmentFileName(this, '{{ equipment.id }}')"
+                        >
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-hero px-4">
+                        Update Equipment
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endfor %}
 
 {% endblock %}

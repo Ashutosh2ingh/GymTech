@@ -147,6 +147,29 @@
             }
         </script>
         <script>
+            function updateEquipmentFileName(input) {
+                const fileNameSpan = document.getElementById("equipment-file-name");
+
+                if (input.files && input.files.length > 0) {
+                    fileNameSpan.textContent = input.files[0].name;
+                } else {
+                    fileNameSpan.textContent = "No file selected";
+                }
+            }
+
+            function updateEditEquipmentFileName(input, id) {
+                const fileNameSpan = document.getElementById(
+                    "equipment-file-name-" + id
+                );
+
+                if (input.files && input.files.length > 0) {
+                    fileNameSpan.textContent = input.files[0].name;
+                } else {
+                    fileNameSpan.textContent = "No file selected";
+                }
+            }
+        </script>
+        <script>
             document.addEventListener("DOMContentLoaded", function () {
 
                 function initSlider(sliderId) {

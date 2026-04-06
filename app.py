@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, session
-from models import db, User, Plan, PlanFeature, Profile, Employee, Trainer, Salary
+from models import db, User, Plan, PlanFeature, Profile, Employee, Trainer, Salary, Equipment
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os, uuid
@@ -852,7 +852,89 @@ def equipments():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
-    return render_template('equipments.html')
+    equipments = Equipment.query.order_by(Equipment.created_at.desc()).all()
+
+    return render_template('equipments.html',equipments=equipments)
+
+
+# 👇 Add Equipments renders HTML
+@app.route('/admin/add-equipment', methods=['POST'])
+def add_equipment():
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('user_type') != 'Admin':
+        flash('Unauthorized access!', 'error')
+        return redirect(url_for('home'))
+
+    name = request.form.get('name')
+    purpose = request.form.get('purpose')
+    image = request.files.get('image')
+
+    equipment = Equipment(
+        name=name,
+        purpose=purpose
+    )
+
+    if image and image.filename != "":
+        filename = secure_filename(image.filename)
+        unique_name = f"{uuid.uuid4()}_{filename}"
+
+        image_path = os.path.join(
+            app.config['UPLOAD_FOLDER'],
+            unique_name
+        )
+
+        image.save(image_path)
+        equipment.image = unique_name
+
+    db.session.add(equipment)
+    db.session.commit()
+
+    flash('Equipment added successfully!', 'success')
+    return redirect(url_for('equipments'))
+
+
+# 👇 Update Equipments renders HTML
+@app.route('/admin/update-equipment', methods=['POST'])
+def update_equipment():
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('user_type') != 'Admin':
+        flash('Unauthorized access!', 'error')
+        return redirect(url_for('equipments'))
+
+    equipment_id = request.form.get('equipment_id')
+    purpose = request.form.get('purpose')
+    image = request.files.get('image')
+
+    equipment = Equipment.query.get(equipment_id)
+
+    if not equipment:
+        flash('Equipment not found!', 'error')
+        return redirect(url_for('equipments'))
+
+    equipment.purpose = purpose
+
+    if image and image.filename != "":
+        filename = secure_filename(image.filename)
+        unique_name = f"{uuid.uuid4()}_{filename}"
+
+        image_path = os.path.join(
+            app.config['UPLOAD_FOLDER'],
+            unique_name
+        )
+
+        image.save(image_path)
+        equipment.image = unique_name
+
+    db.session.commit()
+
+    flash('Equipment updated successfully!', 'success')
+    return redirect(url_for('equipments'))
 
 
 if __name__ == "__main__":

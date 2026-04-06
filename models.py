@@ -178,3 +178,16 @@ class Salary(db.Model):
         db.DateTime,
         nullable=True
     )
+
+class Equipment(db.Model):
+
+    __tablename__ = "equipments"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255),nullable=False)
+    purpose = db.Column(db.Text,nullable=False)
+    image = db.Column(db.String(255),nullable=False,default="about.png")
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
