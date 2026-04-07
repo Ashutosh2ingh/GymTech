@@ -1,10 +1,11 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, session
-from models import db, User, Plan, PlanFeature, Profile, Employee, Trainer, Salary, Equipment
+from models import db, User, Plan, PlanFeature, Profile, Employee, Trainer, Salary, Equipment, Payment
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os, uuid
 from datetime import datetime, timedelta
 from flask_migrate import Migrate
+import razorpay
 
 app = Flask(__name__)
 
@@ -13,8 +14,18 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 app.config['SECRET_KEY'] = 'dev-secret-key'  
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["RAZORPAY_KEY_ID"] = "rzp_test_SaTRUipMOD5onN"
+app.config["RAZORPAY_KEY_SECRET"] = "Mc03EgdTu2UAHEmCX8Vz7Ywa"
+
 app.config['UPLOAD_FOLDER'] = os.path.join(BASE_DIR, 'static', 'images')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+razorpay_client = razorpay.Client(
+    auth=(
+        app.config["RAZORPAY_KEY_ID"],
+        app.config["RAZORPAY_KEY_SECRET"]
+    )
+)
 
 db.init_app(app)
 migrate = Migrate(app, db)
@@ -400,8 +411,9 @@ def plan():
         return redirect(url_for('login'))
 
     plans = Plan.query.all()
+    trainers = Trainer.query.all()
 
-    return render_template('plans.html', plans=plans, feature_list=FEATURE_LIST)
+    return render_template('plans.html', plans=plans, trainers=trainers, feature_list=FEATURE_LIST, razorpay_key=app.config["RAZORPAY_KEY_ID"])
 
 
 # 👇 Add Plan renders HTML
@@ -935,6 +947,85 @@ def update_equipment():
 
     flash('Equipment updated successfully!', 'success')
     return redirect(url_for('equipments'))
+
+
+# 👇 Add Payment renders HTML
+@app.route('/create-payment-order', methods=['POST'])
+def create_payment_order():
+
+    if 'user_id' not in session:
+        return {"error": "Login required"}, 401
+
+    if session.get('user_type') == 'Admin':
+        return {"error": "Admin cannot buy plan"}, 403
+
+    plan_id = request.form.get("plan_id")
+    trainer_id = request.form.get("trainer_id")
+    months = int(request.form.get("months"))
+
+    plan = Plan.query.get(plan_id)
+    trainer = Trainer.query.get(trainer_id)
+
+    membership_fee = plan.price * months
+
+    trainer_fee = 0
+    if trainer and trainer.pt_monthly_fee:
+        trainer_fee = trainer.pt_monthly_fee * months
+
+    total_amount = membership_fee + trainer_fee
+
+    order = razorpay_client.order.create({
+        "amount": total_amount * 100,
+        "currency": "INR",
+        "payment_capture": 1
+    })
+
+    return {
+        "order_id": order["id"],
+        "amount": total_amount,
+        "membership_fee": membership_fee,
+        "trainer_fee": trainer_fee
+    }
+
+
+# 👇 Verify Payment
+@app.route('/verify-payment', methods=['POST'])
+def verify_payment():
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    payment = Payment(
+        member_id=session['user_id'],
+        plan_id=request.form.get("plan_id"),
+        trainer_id=request.form.get("trainer_id"),
+        months=request.form.get("months"),
+        membership_fee=request.form.get("membership_fee"),
+        trainer_fee=request.form.get("trainer_fee"),
+        total_amount=request.form.get("total_amount"),
+        payment_id=request.form.get("payment_id"),
+        status="Paid"
+    )
+
+    db.session.add(payment)
+
+    user = User.query.get(session['user_id'])
+
+    if not user.profile:
+        user.profile = Profile(user_id=user.id)
+
+    months = int(request.form.get("months"))
+    start_date = datetime.now()
+    end_date = start_date + timedelta(days=30 * months)
+
+    user.profile.plan_id = request.form.get("plan_id")
+    user.profile.start_date = start_date
+    user.profile.end_date = end_date
+
+    db.session.commit()
+
+    flash("Payment successful and plan activated!", "success")
+    return redirect(url_for("profile"))
 
 
 if __name__ == "__main__":

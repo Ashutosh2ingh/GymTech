@@ -191,3 +191,27 @@ class Equipment(db.Model):
         db.DateTime,
         default=datetime.utcnow
     )
+
+class Payment(db.Model):
+
+    __tablename__ = "payments"
+
+    id = db.Column(db.Integer, primary_key=True)
+    member_id = db.Column(db.Integer,db.ForeignKey("users.id"),nullable=False)
+    plan_id = db.Column(db.Integer,db.ForeignKey("plans.id"),nullable=False)
+    trainer_id = db.Column(db.Integer,db.ForeignKey("trainers.id"),nullable=True)
+    months = db.Column(db.Integer, nullable=False)
+    membership_fee = db.Column(db.Integer, nullable=False)
+    trainer_fee = db.Column(db.Integer, nullable=False)
+    total_amount = db.Column(db.Integer, nullable=False)
+    payment_id = db.Column(db.String(255), nullable=False)
+    status = db.Column(db.String(50),default="Paid")
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    user = db.relationship("User")
+    plan = db.relationship("Plan")
+    trainer = db.relationship("Trainer")

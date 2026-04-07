@@ -877,3 +877,11 @@
   background: linear-gradient(135deg, #123f3f, #0f3d3e);
   min-height: calc(100vh - 60px);;
 }
+
+.price-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 18px;
+  font-weight: 700;
+}

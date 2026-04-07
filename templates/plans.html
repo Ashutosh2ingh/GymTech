@@ -70,7 +70,11 @@
                             {% endfor %}
                         </ul>
 
-                        <button class="btn btn-hero w-100">
+                        <button 
+                            class="btn btn-hero w-100"
+                            data-bs-toggle="modal"
+                            data-bs-target="#buyPlanModal{{ plan.id }}"
+                        >
                             Choose Plan
                         </button>
                     </div>
@@ -198,6 +202,7 @@
 {% endfor %}
 {% endif %}
 
+<!-- Delete PLAN MODALS -->
 {% if session.get('user_type') == 'Admin' %}
 {% for plan in plans %}
 <div class="modal fade" id="deletePlanModal{{ plan.id }}" tabindex="-1">
@@ -228,5 +233,188 @@
 </div>
 {% endfor %}
 {% endif %}
+
+<!-- Buy PLAN MODALS -->
+{% for plan in plans %}
+<div class="modal fade" id="buyPlanModal{{ plan.id }}">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Choose {{ plan.name }}</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                {% if session.get('user_type') == 'Admin' %}
+                    <p class="text-danger">Admin cannot have a plan</p>
+                {% else %}
+
+                <input type="hidden" id="planPrice{{ plan.id }}" value="{{ plan.price }}">
+
+                <div class="info-grid">
+
+                    <div class="info-box">
+                        <span>Plan</span>
+                        <p>{{ plan.name }}</p>
+                    </div>
+
+                    <div class="info-box">
+                        <span>Monthly Price</span>
+                        <p>₹{{ plan.price }}/month</p>
+                    </div>
+
+                    <div class="info-box">
+                        <span>Months</span>
+                        <input
+                            type="number"
+                            min="1"
+                            value="1"
+                            class="form-control months-input"
+                            data-plan="{{ plan.id }}"
+                            onchange="calculateTotal({{ plan.id }})"
+                        >
+                    </div>
+
+                    <div class="info-box">
+                        <span>Trainer</span>
+                        <select
+                            class="form-control trainer-select"
+                            data-plan="{{ plan.id }}"
+                            onchange="calculateTotal({{ plan.id }})"
+                        >
+                            <option value="">Choose Trainer</option>
+                            {% for trainer in trainers %}
+                            <option
+                                value="{{ trainer.id }}"
+                                data-fee="{{ trainer.pt_monthly_fee or 0 }}"
+                            >
+                                {{ trainer.employee.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="info-box">
+                        <span>Membership Fee</span>
+                        <p class="price-row">
+                            <span>₹</span>
+                            <span id="membershipFee{{ plan.id }}">0</span>
+                        </p>
+                    </div>
+
+                    <div class="info-box">
+                        <span>Trainer Fee</span>
+                        <p class="price-row">
+                            <span>₹</span>
+                            <span id="trainerFee{{ plan.id }}">0</span>
+                        </p>
+                    </div>
+
+                    <div class="info-box full-width">
+                        <span>Total Amount</span>
+                        <p class="price-row fw-bold text-success fs-5">
+                            <span>₹</span>
+                            <span id="totalFee{{ plan.id }}">0</span>
+                        </p>
+                    </div>
+
+                </div>
+
+                <button
+                    class="btn btn-hero w-50 mt-4"
+                    onclick="payNow({{ plan.id }})"
+                >
+                    Proceed To Pay
+                </button>
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+document.querySelectorAll(".months-input, .trainer-select").forEach(el => {
+    el.addEventListener("change", function () {
+        const planId = this.dataset.plan;
+        calculateTotal(planId);
+    });
+});
+
+function calculateTotal(planId) {
+    const months = document.querySelector(
+        `.months-input[data-plan="${planId}"]`
+    ).value || 0;
+
+    const trainer = document.querySelector(
+        `.trainer-select[data-plan="${planId}"]`
+    );
+
+    const trainerFeePerMonth =
+        trainer.options[trainer.selectedIndex].dataset.fee || 0;
+
+    const planPrice =
+        document.getElementById(`planPrice${planId}`).value;
+
+    const membership = months * planPrice;
+    const trainerFee = months * trainerFeePerMonth;
+    const total = membership + trainerFee;
+
+    document.getElementById(`membershipFee${planId}`).innerText = membership;
+    document.getElementById(`trainerFee${planId}`).innerText = trainerFee;
+    document.getElementById(`totalFee${planId}`).innerText = total;
+}
+
+function payNow(planId) {
+    const total = document.getElementById(`totalFee${planId}`).innerText;
+
+    fetch("/create-payment-order", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            plan_id: planId,
+            trainer_id: document.querySelector(`.trainer-select[data-plan="${planId}"]`).value,
+            months: document.querySelector(`.months-input[data-plan="${planId}"]`).value
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const options = {
+            key: "{{ razorpay_key }}",
+            amount: data.amount * 100,
+            currency: "INR",
+            order_id: data.order_id,
+            handler: function(response) {
+
+                const form = document.createElement("form");
+                form.method = "POST";
+                form.action = "/verify-payment";
+
+                form.innerHTML = `
+                    <input name="plan_id" value="${planId}">
+                    <input name="trainer_id" value="${document.querySelector(`.trainer-select[data-plan="${planId}"]`).value}">
+                    <input name="months" value="${document.querySelector(`.months-input[data-plan="${planId}"]`).value}">
+                    <input name="membership_fee" value="${data.membership_fee}">
+                    <input name="trainer_fee" value="${data.trainer_fee}">
+                    <input name="total_amount" value="${data.amount}">
+                    <input name="payment_id" value="${response.razorpay_payment_id}">
+                `;
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        };
+
+        new Razorpay(options).open();
+    });
+}
+</script>
 
 {% endblock %}
