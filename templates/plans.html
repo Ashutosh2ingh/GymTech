@@ -70,13 +70,23 @@
                             {% endfor %}
                         </ul>
 
-                        <button 
-                            class="btn btn-hero w-100"
-                            data-bs-toggle="modal"
-                            data-bs-target="#buyPlanModal{{ plan.id }}"
+                        <span
+                            {% if session.get('user_type') != 'Admin' and has_active_plan %}
+                                title="You already have an active plan"
+                            {% endif %}
                         >
-                            Choose Plan
-                        </button>
+                            <button 
+                                class="btn btn-hero w-100"
+                                {% if session.get('user_type') != 'Admin' and has_active_plan %}
+                                    disabled
+                                {% else %}
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#buyPlanModal{{ plan.id }}"
+                                {% endif %}
+                            >
+                                Choose Plan
+                            </button>
+                        </span>
                     </div>
                 </div>
                 {% endfor %}
@@ -388,9 +398,13 @@ function payNow(planId) {
     .then(data => {
         const options = {
             key: "{{ razorpay_key }}",
-            amount: data.amount * 100,
-            currency: "INR",
             order_id: data.order_id,
+            currency: "INR",
+            name: "GymTech",
+            description: "Plan Payment",
+            prefill: {
+                contact: "9999999999"
+            },
             handler: function(response) {
 
                 const form = document.createElement("form");

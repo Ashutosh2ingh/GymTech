@@ -119,9 +119,13 @@
                 <ul class="footer-links">
                     <li><a href="/">Home</a></li>
                     <li><a href="/plan">Plans</a></li>
-                    <li><a href="/contact">Contact</a></li>
+                    <li><a href="/equipments">Equipment</a></li>
+                    {% if session.get('user_type') != 'Admin' %}
+                        <li><a href="/contact">Contact</a></li>
+                    {% endif %}
                     {% if session.get('user_type') == 'Admin' %}
                         <li><a href="/members">Members</a></li>
+                        <li><a href="/employees">Employees</a></li>
                     {% endif %}
                 </ul>
             </div>

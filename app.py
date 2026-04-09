@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 import os, uuid
 from datetime import datetime, timedelta
 from flask_migrate import Migrate
+from sqlalchemy import extract
 import razorpay
 
 app = Flask(__name__)
@@ -121,8 +122,10 @@ def profile():
     user = User.query.get(session['user_id'])
 
     remaining_days = None
-    total_paid = 0
     plan_expired = False
+
+    payments = Payment.query.filter_by(member_id=user.id,status="Paid").all()
+    total_paid = sum(payment.total_amount for payment in payments)
 
     if user and user.profile and user.profile.plan:
         today = datetime.now().date()
@@ -139,25 +142,6 @@ def profile():
             if remaining_days <= 0:
                 plan_expired = True
                 remaining_days = 0
-                total_paid = 0
-            else:
-                start_date = (
-                    user.profile.start_date.date()
-                    if isinstance(user.profile.start_date, datetime)
-                    else user.profile.start_date
-                )
-
-                months_selected = max(
-                    1,
-                    (
-                        (end_date.year - start_date.year) * 12
-                        + (end_date.month - start_date.month)
-                    )
-                )
-
-                total_paid = (
-                    user.profile.plan.price * months_selected
-                )
 
     return render_template(
         'profile.html',
@@ -413,7 +397,27 @@ def plan():
     plans = Plan.query.all()
     trainers = Trainer.query.all()
 
-    return render_template('plans.html', plans=plans, trainers=trainers, feature_list=FEATURE_LIST, razorpay_key=app.config["RAZORPAY_KEY_ID"])
+    has_active_plan = False
+
+    if session.get("user_type") != "Admin":
+        user = User.query.get(session["user_id"])
+
+        if (
+            user
+            and user.profile
+            and user.profile.end_date
+            and user.profile.end_date > datetime.now()
+        ):
+            has_active_plan = True
+
+    return render_template(
+        'plans.html', 
+        plans=plans, 
+        trainers=trainers, 
+        feature_list=FEATURE_LIST, 
+        razorpay_key=app.config["RAZORPAY_KEY_ID"],
+        has_active_plan=has_active_plan
+    )
 
 
 # 👇 Add Plan renders HTML
@@ -1026,6 +1030,44 @@ def verify_payment():
 
     flash("Payment successful and plan activated!", "success")
     return redirect(url_for("profile"))
+
+
+# 👇 Show Payment renders HTML
+@app.route("/payments")
+def payments():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if session.get("user_type") != "Admin":
+        flash("Access denied", "error")
+        return redirect(url_for("home"))
+
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+
+    selected_month = request.args.get("month", current_month, type=int)
+    selected_year = request.args.get("year", current_year, type=int)
+
+    payment_history = (
+        Payment.query
+        .join(User, Payment.member_id == User.id)
+        .join(Plan, Payment.plan_id == Plan.id)
+        .filter(
+            extract("month", Payment.created_at) == selected_month,
+            extract("year", Payment.created_at) == selected_year
+        )
+        .order_by(Payment.created_at.desc())
+        .all()
+    )
+
+    return render_template(
+        "payments.html",
+        payment_history=payment_history,
+        selected_month=selected_month,
+        selected_year=selected_year,
+        current_year=current_year
+    )
 
 
 if __name__ == "__main__":

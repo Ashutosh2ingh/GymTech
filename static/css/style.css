@@ -178,7 +178,29 @@
   font-weight: 500;
 }
 
+.btn-hero:disabled,
+.btn-hero.disabled {
+  background: #2ec4b6 !important;
+  color: white !important;
+  opacity: 1 !important;
+  cursor: not-allowed;
+  pointer-events: auto !important;
+}
+
+.btn-payment {
+  background: #2ec4b6;
+  color: white;
+  padding: 12px 50px;
+  border-radius: 30px;
+  border: none;
+  font-weight: 500;
+}
+
 .btn-hero:hover {
+  background: #28a99d;
+}
+
+.btn-payment:hover {
   background: #28a99d;
 }
 
@@ -885,3 +907,52 @@
   font-size: 18px;
   font-weight: 700;
 }
+/* Equipment Section End */
+
+/* Payment Filter Start */
+.payment-filter-form {
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.theme-filter-input {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(46, 196, 182, 0.4);
+  color: white;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-right: 30px;
+  min-width: 180px;
+  outline: none;
+  box-shadow: none;
+  transition: 0.3s ease;
+}
+
+.theme-filter-input:focus {
+  border-color: #2ec4b6;
+  box-shadow: 0 0 10px rgba(46, 196, 182, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.theme-filter-input option {
+  background: #0a2c2c;
+  color: white;
+}
+
+.theme-filter-input::placeholder {
+  color: rgba(255,255,255,0.6);
+}
+
+/* Hide number input arrows for year field */
+.theme-filter-input[type="number"]::-webkit-outer-spin-button,
+.theme-filter-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.theme-filter-input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+/* Payment Filter End */

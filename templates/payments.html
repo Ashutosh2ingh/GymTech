@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="members-section">
+    <div class="container">
+
+        <h2 class="text-center page-heading mb-4">Payment History</h2>
+
+        <!-- Filters -->
+        <form method="GET" class="payment-filter-form mb-4">
+            <select name="month" class="theme-filter-input">
+                {% for month in range(1, 13) %}
+                <option value="{{ month }}"
+                    {% if month == selected_month %}selected{% endif %}>
+                    {{ [
+                        '', 'January', 'February', 'March',
+                        'April', 'May', 'June',
+                        'July', 'August', 'September',
+                        'October', 'November', 'December'
+                    ][month] }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <input
+                type="number"
+                name="year"
+                value="{{ selected_year }}"
+                class="theme-filter-input"
+                min="2000"
+                max="{{ current_year }}"
+                placeholder="Enter year"
+            >
+            <button class="btn btn-payment">
+                Filter
+            </button>
+        </form>
+
+        <div class="table-container-salary">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Member</th>
+                        <th>Plan</th>
+                        <th>Months</th>
+                        <th>Membership Fee</th>
+                        <th>Trainer Fee</th>
+                        <th>Total Amount</th>
+                        <th>Payment ID</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% if payment_history %}
+                        {% for payment in payment_history %}
+                        <tr>
+                            <td>{{ payment.user.name }}</td>
+                            <td>{{ payment.plan.name }}</td>
+                            <td>{{ payment.months }}</td>
+                            <td>₹{{ payment.membership_fee }}</td>
+                            <td>₹{{ payment.trainer_fee }}</td>
+                            <td class="fw-bold text-success">
+                                ₹{{ payment.total_amount }}
+                            </td>
+                            <td>{{ payment.payment_id }}</td>
+                            <td>
+                                {{ payment.created_at.strftime('%d-%m-%Y %I:%M %p') }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">
+                                No data available for this month
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
