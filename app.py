@@ -12,11 +12,24 @@ app = Flask(__name__)
 
 # 🔗 Database Configuration
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-app.config['SECRET_KEY'] = 'dev-secret-key'  
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'database.db')
+
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'database.db')
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL:
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'database.db')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config["RAZORPAY_KEY_ID"] = "rzp_test_SaTRUipMOD5onN"
-app.config["RAZORPAY_KEY_SECRET"] = "Mc03EgdTu2UAHEmCX8Vz7Ywa"
+
+# app.config['SECRET_KEY'] = 'dev-secret-key'  
+# app.config["RAZORPAY_KEY_ID"] = "rzp_test_SaTRUipMOD5onN"
+# app.config["RAZORPAY_KEY_SECRET"] = "Mc03EgdTu2UAHEmCX8Vz7Ywa"
+
+app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
+app.config["RAZORPAY_KEY_ID"] = os.environ.get("RAZORPAY_KEY_ID")
+app.config["RAZORPAY_KEY_SECRET"] = os.environ.get("RAZORPAY_KEY_SECRET")
 
 app.config['UPLOAD_FOLDER'] = os.path.join(BASE_DIR, 'static', 'images')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
