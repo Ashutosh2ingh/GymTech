@@ -67,7 +67,7 @@ class Profile(db.Model):
     user_type = db.Column(
         db.Enum('Member', 'Admin', name='user_types'),
         nullable=False,
-        default='Member'
+        default='Admin'
     )
     plan_id = db.Column(
         db.Integer,
