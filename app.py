@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request, redirect, flash, url_for, session
 from models import db, User, Plan, PlanFeature, Profile, Employee, Trainer, Salary, Equipment, Payment
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,6 +8,8 @@ from datetime import datetime, timedelta
 from flask_migrate import Migrate
 from sqlalchemy import extract
 import razorpay
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 
