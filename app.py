@@ -21,7 +21,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.config['SECRET_KEY'] = 'dev-secret-key'  
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 
 # app.config["RAZORPAY_KEY_ID"] = "rzp_test_SaTRUipMOD5onN"
 # app.config["RAZORPAY_KEY_SECRET"] = "Mc03EgdTu2UAHEmCX8Vz7Ywa"
