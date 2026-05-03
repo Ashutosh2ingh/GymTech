@@ -181,13 +181,18 @@ def update_profile():
     user_type = request.form.get('user_type')
     image = request.files.get('image') 
 
+    if session.get('user_type') == 'Admin':
+        assigned_type = user_type if user_type in ['Admin', 'Member'] else 'Member'
+    else:
+        assigned_type = 'Member'
+
     # If profile does not exist, create it
     if not user.profile:
         profile = Profile(
             user_id=user.id,
             phone=phone,
             address=address,
-            user_type=user_type if user_type in ['Admin', 'Member'] else 'Member'
+            user_type=assigned_type
         )
         db.session.add(profile)
     else:
